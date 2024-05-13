@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { QUESTION } from "../interface";
 import { FieldValues, UseFormReturn } from "react-hook-form";
 import {
@@ -17,12 +17,16 @@ function Questions({
   isSingle,
   memberArray,
   inputSelectStyle,
+  currMember,
+  questionId,
 }: Readonly<{
   qutestionObject: QUESTION;
   form: UseFormReturn<FieldValues, any, undefined>;
   isSingle: boolean;
   memberArray?: string[];
   inputSelectStyle?: SystemStyleObject | undefined;
+  currMember?: string;
+  questionId?: string;
 }>) {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [selectedMember, setSelectedMember] = useState<string[]>([]);
@@ -40,19 +44,26 @@ function Questions({
       setSelectedMember([...selectedMember, member]);
     }
   };
-  
+
+  useEffect(() => {
+    if (!isCollapsed) {
+      setSelectedMember([]);
+    }
+  }, [isCollapsed]);
 
   if (!isSingle && memberArray?.length === 0) {
     throw new Error("Member array is empty");
   }
+  //
+
   return (
     <Grid
       sx={{
-        border: "1px dashed grey",
         margin: "12px 0",
-        padding: "12px 12px 12px 24px",
+        padding: "12px",
         background: "white",
         borderRadius: "8px",
+        boxShadow: "inset 0px 0px 6px rgba(0, 0, 0, 0.1)",
       }}
     >
       <Flex
@@ -62,11 +73,12 @@ function Questions({
           flexDirection: { xs: "column", md: "row" },
         }}
       >
-        <Box sx={{ width: "60%" }}>
-          <Text fontSize={"medium"}>
-           {qutestionObject.main_question}
+        <Box sx={{ width: { xs: "90%", md: "60%" } }}>
+          <Text fontSize="medium" fontWeight="bold">
+            {questionId ? `${questionId}. ` : ""}
+            {qutestionObject.main_question}
           </Text>
-          <Text fontSize={"small"}>
+          <Text fontSize="sm" color="gray.600">
             {qutestionObject.question_description
               ? qutestionObject.question_description
               : `Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.  `}
@@ -83,16 +95,25 @@ function Questions({
       </Flex>
       {isSingle ? (
         <>
-          {isCollapsed && qutestionObject?.sub_ques?.length > 0
-            ? qutestionObject?.sub_ques?.map((subQuestion) => {
+          {isCollapsed &&
+          qutestionObject?.sub_ques?.length &&
+          Number(qutestionObject?.sub_ques?.length) > 0
+            ? qutestionObject?.sub_ques?.map((subQuestion, i) => {
                 return (
                   <Questions
                     form={form}
-                    qutestionObject={subQuestion}
+                    qutestionObject={{
+                      ...subQuestion,
+                      code: currMember
+                        ? `${currMember}-${subQuestion.code}`
+                        : subQuestion.code,
+                    }}
                     key={subQuestion.code}
                     isSingle={isSingle}
                     memberArray={memberArray}
                     inputSelectStyle={inputSelectStyle}
+                    currMember={currMember ? currMember : ""}
+                    questionId={questionId ? `${questionId}.${i + 1}` : "1"}
                   />
                 );
               })
@@ -103,7 +124,7 @@ function Questions({
       {!isSingle && isCollapsed ? (
         <Grid sx={{ margin: "12px 0", padding: "12px" }}>
           <Flex sx={{ gap: "8px" }}>
-            {qutestionObject?.sub_ques.length
+            {qutestionObject?.sub_ques?.length
               ? memberArray?.map((mem) => {
                   return (
                     <Button
@@ -113,9 +134,13 @@ function Questions({
                       sx={{
                         margin: "12px 0",
                         background: selectedMember.includes(mem)
-                          ? "#edf2f7"
+                          ? "#319795"
                           : "white",
                         border: `1px solid #edf2f7`,
+                        color: selectedMember.includes(mem) ? "white" : "black",
+                        "&:hover": {
+                          background: "#319795",
+                        },
                       }}
                     >
                       {mem}
@@ -129,14 +154,15 @@ function Questions({
                 return (
                   <>
                     <Text
-                      fontSize={"medium"}
+                      fontSize={"large"}
                       fontWeight={"bold"}
-                      paddingLeft={"24px"}
+                      paddingLeft={"12px"}
                     >
                       {mem}
                     </Text>
-                    {qutestionObject?.sub_ques?.length > 0
-                      ? qutestionObject?.sub_ques?.map((subQuestion) => {
+                    {qutestionObject?.sub_ques?.length &&
+                    Number(qutestionObject?.sub_ques?.length) > 0
+                      ? qutestionObject?.sub_ques?.map((subQuestion, i) => {
                           return (
                             <Questions
                               form={form}
@@ -145,9 +171,13 @@ function Questions({
                                 code: `${mem}-${subQuestion.code}`,
                               }}
                               key={subQuestion.code}
-                              isSingle={isSingle}
+                              isSingle={true}
                               memberArray={memberArray}
                               inputSelectStyle={inputSelectStyle}
+                              currMember={mem}
+                              questionId={
+                                questionId ? `${questionId}.${i + 1}` : "1"
+                              }
                             />
                           );
                         })

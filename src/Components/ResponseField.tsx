@@ -6,7 +6,7 @@ import {
   SystemStyleObject,
   Text,
 } from "@chakra-ui/react";
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import { FieldValues, UseFormReturn } from "react-hook-form";
 import { QUESTION } from "../interface";
 import SelectController from "./SelectController";
@@ -25,12 +25,13 @@ function ResponseField({
 }>) {
   const { code, response_type, is_mandatory, regex, min, max } =
     qutestionObject;
-
   const errroType = form.formState.errors[code as string]?.type;
 
+  const [toggle, setToggle] = useState<boolean>(false);
   const handleButtonClick = (value: boolean) => {
     form.setValue(code as string, value);
     setIsCollapsed(value);
+    setToggle(value);
     if (form.formState.errors[code as string]) {
       form.clearErrors(code as string);
     }
@@ -47,12 +48,6 @@ function ResponseField({
       });
     }
   };
-
-  useEffect(() => {
-    if (form.getValues(code as string)) {
-      setIsCollapsed(true);
-    }
-  }, []);
 
   if (!["bool", "text", "number", "date", "dropdown"].includes(response_type))
     throw new Error("Invalid response type");
@@ -73,21 +68,24 @@ function ResponseField({
           })}
         >
           <Button
+            variant={"solid"}
             onClick={() => handleButtonClick(true)}
             sx={{
               borderRadius: "8px 0 0 8px",
               padding: "0 24px",
-              background: form.getValues(code as string) ? "#edf2f7" : "White",
+              color: toggle ? "white" : "black",
+              background: toggle ? "#319795" : "White",
             }}
           >
             Yes
           </Button>
           <Button
             onClick={() => handleButtonClick(false)}
-            style={{
+            sx={{
               borderRadius: "0 8px 8px 0",
               padding: "0 24px",
-              background: form.getValues(code as string) ? "white" : "#edf2f7",
+              color: toggle ? "black" : "white",
+              background: toggle ? "white" : "#319795",
             }}
           >
             No
@@ -107,6 +105,7 @@ function ResponseField({
       <Box>
         <Input
           type="text"
+          placeholder="Your answer here..."
           sx={{
             ...(inputSelectStyle
               ? inputSelectStyle
@@ -133,6 +132,7 @@ function ResponseField({
       <Box>
         <Input
           type="number"
+          placeholder="Your answer here..."
           sx={{
             ...(inputSelectStyle
               ? inputSelectStyle
@@ -188,12 +188,19 @@ function ResponseField({
     Number(qutestionObject?.options?.length) > 0
   ) {
     return (
-      <SelectController
-        form={form}
-        questionObject={qutestionObject}
-        key={qutestionObject.code}
-        style={inputSelectStyle}
-      />
+      <Box>
+        <SelectController
+          form={form}
+          questionObject={qutestionObject}
+          key={qutestionObject.code}
+          style={inputSelectStyle}
+        />
+        {form.formState.errors[code as string] && (
+          <Text fontSize={"small"} color={"red"}>
+            {reactHookFormErrMsg[errroType as keyof typeof reactHookFormErrMsg]}
+          </Text>
+        )}
+      </Box>
     );
   }
 }

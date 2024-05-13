@@ -3,41 +3,30 @@ import { data } from "./Data";
 import { useForm } from "react-hook-form";
 import Questions from "./Components/Questions";
 import {
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
+  Box,
   Button,
-  Grid,
-  Modal,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
+  Flex,
   Text,
 } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { QUESTION } from "./interface";
-/*
-questionnaire = Array of object
-config = Object = {
-  isSingle: boolean,
-  memberArray: Array,
-  setResponse:React.Dispatch<React.SetStateAction<QUESTION[] | undefined>>,
-  globalStyle:Object = {
-    toggleButtonContainer: Object
-    toggleButton: Object
-    Question:Object
-    subQuestion: Object
-    description:Object
-    responseFieldStyle
-  }
-}
-*/
+import useGenerateResponseHook from "./CustomHooks/useGenerateResponseHook";
+import ExpectedJson from "./Components/ExpectedJson";
+import Introduction from "./Components/Introduction";
+
 function App() {
   const questionnairForm = useForm({ mode: "onChange" });
   const [questionState, setQuestionState] = useState<QUESTION[]>();
-  const isSingle = true;
-  const memberArray = ["Member 1", "Member 2"];
+  const { generateResponse, generateResponseForMember } =
+    useGenerateResponseHook();
 
   const config = {
-    isSingle: true,
+    isSingle: false,
     memberArray: ["Member 1", "Member 2"],
     setResponse: () => {},
     globalStyle: {
@@ -54,8 +43,11 @@ function App() {
     return data.map((obj, index) => {
       const code = parentCode ? `${parentCode}_${index}` : `${index + 1}`;
       const updatedObj = { ...obj, code };
-      if (obj.sub_ques.length > 0) {
-        updatedObj.sub_ques = updateDataWithCode(obj.sub_ques, code);
+      if (Number(obj?.sub_ques?.length) > 0) {
+        updatedObj.sub_ques = updateDataWithCode(
+          obj?.sub_ques as QUESTION[],
+          code
+        );
       }
       return updatedObj;
     });
@@ -65,43 +57,163 @@ function App() {
     setQuestionState(updateDataWithCode(data));
   }, [data]);
 
-  const generateResponse = (response: { [key: string]: unknown }) => {
-    console.log("generateResponse --->", response);
-  };
-
   return (
-    <Grid
-      style={{ background: "#EDF2F7", padding: "24px", minHeight: "100vh" }}
-    >
-      <Text
-        fontSize={"x-large"}
-        fontWeight={"bold"}
-        textAlign={"center"}
-        margin={"36px 0"}
-        textDecoration={"underline"}
+    <Box style={{ padding: "24px", minHeight: "100vh" }}>
+      <Introduction />
+      <ExpectedJson />
+      <Box
+        sx={{
+          height: "fit-content",
+          padding: "20px",
+        }}
       >
-        React - Questionnaire
-      </Text>
-      <form onSubmit={questionnairForm.handleSubmit(generateResponse)}>
-        {questionState?.length
-          ? questionState?.map((questionObject) => {
-              return (
-                <Questions
-                  key={questionObject.code}
-                  qutestionObject={questionObject}
-                  form={questionnairForm}
-                  isSingle={isSingle}
-                  memberArray={memberArray}
-                  // responseFieldStyle={}
-                />
-              );
-            })
-          : null}
-        <Button type="submit" variant="solid">
-          Submit
-        </Button>
-      </form>
-    </Grid>
+        <Text fontWeight="bold" fontSize="xl" marginBottom="16px">
+          Form Usage:
+        </Text>
+        <Accordion
+          sx={{ background: "white"}}
+          allowMultiple
+          defaultIndex={[0, 1]}
+        >
+          <AccordionItem
+            sx={{
+              padding: "12px 0",
+              border: "none",
+              boxShadow: "2px 5px 10px rgba(0, 0, 0, 0.1)",
+              borderRadius: "12px",
+              background: "gray.50",
+            }}
+          >
+            <h2>
+              <AccordionButton>
+                <Box as="span" flex="1" textAlign="left" fontWeight={"bold"}>
+                  Single Member (Questionnaire for a single member):
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel pb={4}>
+              <form
+                onSubmit={questionnairForm.handleSubmit((e) => {
+                  if (config.isSingle) {
+                    console.log(
+                      generateResponse(e, questionState as QUESTION[])
+                    );
+                  } else {
+                    console.log(
+                      generateResponseForMember(e, questionState as QUESTION[])
+                    );
+                  }
+                })}
+              >
+                {questionState?.length
+                  ? questionState?.map((questionObject, i) => {
+                      return (
+                        <Questions
+                          key={questionObject.code}
+                          qutestionObject={questionObject}
+                          form={questionnairForm}
+                          isSingle={true}
+                          memberArray={config?.memberArray}
+                          questionId={(i + 1).toString()}
+                        />
+                      );
+                    })
+                  : null}
+                <Flex
+                  sx={{
+                    width: "100%",
+                    alignItems: "center",
+                  }}
+                >
+                  <Button
+                    type="submit"
+                    variant="solid"
+                    sx={{
+                      margin: "auto",
+                      background: "#319795",
+                      color: "white",
+                      "&:hover": { background: "#2c7a7b" },
+                    }}
+                  >
+                    Submit
+                  </Button>
+                </Flex>
+              </form>
+            </AccordionPanel>
+          </AccordionItem>
+
+          <AccordionItem
+            sx={{
+              padding: "12px 0",
+              border: "none",
+              boxShadow: "2px 5px 10px rgba(0, 0, 0, 0.1)",
+              borderRadius: "12px",
+              marginTop: "24px",
+              background: "gray.50",
+            }}
+          >
+            <h2>
+              <AccordionButton>
+                <Box as="span" flex="1" textAlign="left" fontWeight={"bold"}>
+                  Multiple Member (Questionnaire for multiple members):
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel pb={4}>
+              <form
+                onSubmit={questionnairForm.handleSubmit((e) => {
+                  if (config.isSingle) {
+                    console.log(
+                      generateResponse(e, questionState as QUESTION[])
+                    );
+                  } else {
+                    console.log(
+                      generateResponseForMember(e, questionState as QUESTION[])
+                    );
+                  }
+                })}
+              >
+                {questionState?.length
+                  ? questionState?.map((questionObject, i) => {
+                      return (
+                        <Questions
+                          key={questionObject.code}
+                          qutestionObject={questionObject}
+                          form={questionnairForm}
+                          isSingle={false}
+                          memberArray={config?.memberArray}
+                          questionId={(i + 1).toString()}
+                        />
+                      );
+                    })
+                  : null}
+                <Flex
+                  sx={{
+                    width: "100%",
+                    alignItems: "center",
+                  }}
+                >
+                  <Button
+                    type="submit"
+                    variant="solid"
+                    sx={{
+                      margin: "auto",
+                      background: "#319795",
+                      color: "white",
+                      "&:hover": { background: "#2c7a7b" },
+                    }}
+                  >
+                    Submit
+                  </Button>
+                </Flex>
+              </form>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+      </Box>
+    </Box>
   );
 }
 

@@ -15,7 +15,7 @@ const SelectController = ({
   const { control } = form;
 
   return (
-    <Container as="form" sx={{ ...style }}>
+    <Container sx={{ ...(style ? style : { padding: 0 }) }}>
       <Controller
         control={control}
         name={questionObject?.code as string}
@@ -23,8 +23,7 @@ const SelectController = ({
           required: "Please select at least one",
         }}
         render={({
-          field: { onChange, onBlur, value, name, ref },
-          fieldState: { error },
+          field: { onChange, onBlur, value, ref },
         }) => (
           <Select
             {...(questionObject?.multi_select ? { isMulti: true } : {})}

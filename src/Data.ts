@@ -20,7 +20,18 @@ export const data = [
           { label: "Beer", value: "Beer" },
           { label: "Wine", value: "Wine" },
         ],
-        multi_select: false,
+        multi_select: true,
+      },
+      {
+        main_question: "Exact Diagnosis",
+        question_description: null,
+        response_type: "text",
+        value: "",
+        question_type: "medical",
+        sub_ques: [],
+        question_for: [],
+        is_mandatory: 1,
+   
       },
       {
         main_question: "Diagnosis Date",
@@ -41,10 +52,12 @@ export const data = [
         sub_ques: [],
         question_for: ["self", "spouse", "son", "daughter", "mother", "father"],
         is_mandatory: 1,
+        min: 1,
+        max: 10,
       },
     ],
     question_for: [],
-    is_mandatory: 1,
+    is_mandatory: 0,
   },
   {
     main_question: "Has planned a surgery ?",
@@ -87,7 +100,7 @@ export const data = [
       },
     ],
     question_for: [],
-    is_mandatory: 1,
+    is_mandatory: 0,
   },
   {
     main_question: "Takes medicines regularly ?",
@@ -138,7 +151,7 @@ export const data = [
       },
     ],
     question_for: [],
-    is_mandatory: 1,
+    is_mandatory: 0,
   },
   {
     main_question: "Has been advised investigation or further tests ?",
@@ -179,7 +192,7 @@ export const data = [
       },
     ],
     question_for: [],
-    is_mandatory: 1,
+    is_mandatory: 0,
   },
   {
     main_question: "Was hospitalized in past?",
@@ -240,7 +253,7 @@ export const data = [
       },
     ],
     question_for: [],
-    is_mandatory: 1,
+    is_mandatory: 0,
   },
   {
     main_question: "Is expecting a baby ?",
@@ -261,6 +274,6 @@ export const data = [
       },
     ],
     question_for: [],
-    is_mandatory: 1,
+    is_mandatory: 0,
   },
 ];
