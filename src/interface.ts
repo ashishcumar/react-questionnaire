@@ -2,7 +2,14 @@ export interface QUESTION {
   code?: string;
   main_question: string;
   question_description?: string | null;
-  response_type: string;
+  response_type:
+    | "bool"
+    | "text"
+    | "number"
+    | "dropdown"
+    | "textArea"
+    | "date"
+    | string;
   value: string | boolean | number | object | null;
   sub_ques?: QUESTION[];
   question_for?: string[] | null;
@@ -14,10 +21,11 @@ export interface QUESTION {
   multi_select?: boolean;
 }
 
-
 export interface CONFIG {
   isSingle: boolean;
-  setResponse: React.Dispatch<React.SetStateAction<QUESTION[] | undefined>>;
+  setResponse: React.Dispatch<
+    React.SetStateAction<QUESTION[] | { [key: string]: QUESTION[] } | undefined>
+  >;
   memberArray?: string[];
   globalStyle?: {
     question?: React.CSSProperties;
@@ -26,5 +34,10 @@ export interface CONFIG {
     toggleButton?: React.CSSProperties;
     inputSelectStyle?: React.CSSProperties;
     toggleButtonContainer?: React.CSSProperties;
+    questionContainer?: React.CSSProperties;
+    toggleBtnTheme?: {
+      primary: string;
+      secondary?: string;
+    };
   };
 }

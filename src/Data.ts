@@ -1,7 +1,7 @@
 export const data = [
   {
     main_question: "Alcohol",
-    question_description: null,
+    question_description:"",
     response_type: "bool",
     value: "",
     question_type: "lifestyle",
@@ -25,13 +25,12 @@ export const data = [
       {
         main_question: "Exact Diagnosis",
         question_description: null,
-        response_type: "text",
+        response_type: "textArea",
         value: "",
         question_type: "medical",
         sub_ques: [],
         question_for: [],
         is_mandatory: 1,
-   
       },
       {
         main_question: "Diagnosis Date",

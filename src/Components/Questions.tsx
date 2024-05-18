@@ -1,22 +1,16 @@
 import { useEffect, useState } from "react";
-import { QUESTION } from "../interface";
+import { CONFIG, QUESTION } from "../interface";
 import { FieldValues, UseFormReturn } from "react-hook-form";
-import {
-  Box,
-  Button,
-  Flex,
-  Grid,
-  SystemStyleObject,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Button, Flex, Grid, Text } from "@chakra-ui/react";
 import ResponseField from "./ResponseField";
+import { useMediaQuery } from "@chakra-ui/react";
 
 function Questions({
   qutestionObject,
   form,
   isSingle,
   memberArray,
-  inputSelectStyle,
+  globalStyle,
   currMember,
   questionId,
 }: Readonly<{
@@ -24,12 +18,13 @@ function Questions({
   form: UseFormReturn<FieldValues, any, undefined>;
   isSingle: boolean;
   memberArray?: string[];
-  inputSelectStyle?: SystemStyleObject | undefined;
+  globalStyle?: CONFIG["globalStyle"];
   currMember?: string;
   questionId?: string;
 }>) {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [selectedMember, setSelectedMember] = useState<string[]>([]);
+  const [isMobile] = useMediaQuery("(max-width: 400px)");
 
   const handleMemberSelection = (member: string) => {
     if (selectedMember.includes(member)) {
@@ -54,42 +49,67 @@ function Questions({
   if (!isSingle && memberArray?.length === 0) {
     throw new Error("Member array is empty");
   }
-  //
 
   return (
     <Grid
-      sx={{
-        margin: "12px 0",
-        padding: "12px",
-        background: "white",
-        borderRadius: "8px",
-        boxShadow: "inset 0px 0px 6px rgba(0, 0, 0, 0.1)",
-      }}
+      sx={
+        globalStyle?.questionContainer
+          ? globalStyle?.questionContainer
+          : {
+              margin: isMobile ? "8px 0" : "12px 0",
+              padding: "12px",
+              background: "white",
+              borderRadius: "8px",
+              boxShadow: "inset 0px 0px 6px rgba(0, 0, 0, 0.1)",
+            }
+      }
     >
       <Flex
         sx={{
           justifyContent: "space-between",
-          alignItems: "flex-start",
-          flexDirection: { xs: "column", md: "row" },
+          alignItems: isMobile ? "" : "flex-start",
+          flexDirection: isMobile ? "column" : "row",
         }}
       >
-        <Box sx={{ width: { xs: "90%", md: "60%" } }}>
-          <Text fontSize="medium" fontWeight="bold">
+        <Box sx={{ width: isMobile ? "100%" : "60%" }}>
+          <Text
+            sx={
+              globalStyle?.question
+                ? globalStyle?.question
+                : { fontSize: "medium", fontWeight: "bold" }
+            }
+          >
             {questionId ? `${questionId}. ` : ""}
             {qutestionObject.main_question}
           </Text>
-          <Text fontSize="sm" color="gray.600">
+          <Text
+            sx={
+              globalStyle?.description
+                ? globalStyle?.description
+                : { fontSize: "sm", color: "gray.600" }
+            }
+          >
             {qutestionObject.question_description
               ? qutestionObject.question_description
-              : `Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.  `}
+              : ``}
           </Text>
         </Box>
-        <Flex sx={{ justifyContent: "end", alignItems: "center" }}>
+        <Flex
+          sx={{
+            justifyContent: "end",
+            alignItems: "center",
+            margin: isMobile ? "8px" : 0,
+            width: isMobile ? "100%" : "40%",
+          }}
+        >
           <ResponseField
             qutestionObject={qutestionObject}
             form={form}
             setIsCollapsed={setIsCollapsed}
-            inputSelectStyle={inputSelectStyle}
+            inputSelectStyle={globalStyle?.inputSelectStyle}
+            toggleButtonContainer={globalStyle?.toggleButtonContainer}
+            toggleButton={globalStyle?.toggleButton}
+            toggleBtnTheme={globalStyle?.toggleBtnTheme}
           />
         </Flex>
       </Flex>
@@ -111,7 +131,7 @@ function Questions({
                     key={subQuestion.code}
                     isSingle={isSingle}
                     memberArray={memberArray}
-                    inputSelectStyle={inputSelectStyle}
+                    globalStyle={globalStyle}
                     currMember={currMember ? currMember : ""}
                     questionId={questionId ? `${questionId}.${i + 1}` : "1"}
                   />
@@ -122,7 +142,10 @@ function Questions({
       ) : null}
 
       {!isSingle && isCollapsed ? (
-        <Grid sx={{ margin: "12px 0", padding: "12px" }}>
+        <Grid sx={{ margin: "12px 0", padding: isMobile ? 0 : "12px" }}>
+          <Text sx={{ fontSize: "16px", fontWeight: "bold", color: "#333" }}>
+            Select Member
+          </Text>
           <Flex sx={{ gap: "8px" }}>
             {qutestionObject?.sub_ques?.length
               ? memberArray?.map((mem) => {
@@ -132,14 +155,19 @@ function Questions({
                       onClick={() => handleMemberSelection(mem)}
                       width={"fit-content"}
                       sx={{
-                        margin: "12px 0",
+                        margin: isMobile ? "8px 0" : "12px 0",
                         background: selectedMember.includes(mem)
-                          ? "#319795"
-                          : "white",
+                          ? globalStyle?.toggleBtnTheme?.primary || "#319795"
+                          : globalStyle?.toggleBtnTheme?.secondary || "white",
                         border: `1px solid #edf2f7`,
-                        color: selectedMember.includes(mem) ? "white" : "black",
+                        color: selectedMember.includes(mem)
+                          ? globalStyle?.toggleBtnTheme?.secondary || "white"
+                          : globalStyle?.toggleBtnTheme?.primary || "black",
                         "&:hover": {
-                          background: "#319795",
+                          background:
+                            globalStyle?.toggleBtnTheme?.primary || "#319795",
+                          color:
+                            globalStyle?.toggleBtnTheme?.secondary || "white",
                         },
                       }}
                     >
@@ -173,7 +201,7 @@ function Questions({
                               key={subQuestion.code}
                               isSingle={true}
                               memberArray={memberArray}
-                              inputSelectStyle={inputSelectStyle}
+                              globalStyle={globalStyle}
                               currMember={mem}
                               questionId={
                                 questionId ? `${questionId}.${i + 1}` : "1"

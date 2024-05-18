@@ -12,15 +12,18 @@ import {
   Button,
   Flex,
   Text,
+  useMediaQuery,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { QUESTION } from "./interface";
 import useGenerateResponseHook from "./CustomHooks/useGenerateResponseHook";
 import ExpectedJson from "./Components/ExpectedJson";
 import Introduction from "./Components/Introduction";
+import UseCases from "./Components/UseCases";
 
 function App() {
   const questionnairForm = useForm({ mode: "onChange" });
+  const [isMobile] = useMediaQuery("(max-width: 400px)");
   const [questionState, setQuestionState] = useState<QUESTION[]>();
   const { generateResponse, generateResponseForMember } =
     useGenerateResponseHook();
@@ -29,13 +32,7 @@ function App() {
     isSingle: false,
     memberArray: ["Member 1", "Member 2"],
     setResponse: () => {},
-    globalStyle: {
-      question: {},
-      subQuestion: {},
-      description: {},
-      toggleButton: {},
-      inputSelectStyle: {},
-      toggleButtonContainer: {},
+    globalStyle: { 
     },
   };
 
@@ -58,8 +55,9 @@ function App() {
   }, [data]);
 
   return (
-    <Box style={{ padding: "24px", minHeight: "100vh" }}>
+    <Box sx={{ padding: isMobile ? "8px" :"24px", minHeight: "100vh" }}>
       <Introduction />
+      <UseCases />
       <ExpectedJson />
       <Box
         sx={{
@@ -68,10 +66,10 @@ function App() {
         }}
       >
         <Text fontWeight="bold" fontSize="xl" marginBottom="16px">
-          Form Usage:
+          Usage:
         </Text>
         <Accordion
-          sx={{ background: "white"}}
+          sx={{ background: "white" }}
           allowMultiple
           defaultIndex={[0, 1]}
         >

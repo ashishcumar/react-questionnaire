@@ -5,6 +5,7 @@ import {
   Input,
   SystemStyleObject,
   Text,
+  Textarea,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { FieldValues, UseFormReturn } from "react-hook-form";
@@ -17,16 +18,24 @@ function ResponseField({
   form,
   setIsCollapsed,
   inputSelectStyle,
+  toggleButtonContainer,
+  toggleButton,
+  toggleBtnTheme,
 }: Readonly<{
   qutestionObject: QUESTION;
   form: UseFormReturn<FieldValues, any, undefined>;
   setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
   inputSelectStyle?: SystemStyleObject | undefined;
+  toggleButtonContainer?: SystemStyleObject | undefined;
+  toggleButton?: SystemStyleObject | undefined;
+  toggleBtnTheme?: {
+    primary: string;
+    secondary?: string;
+  };
 }>) {
   const { code, response_type, is_mandatory, regex, min, max } =
     qutestionObject;
   const errroType = form.formState.errors[code as string]?.type;
-
   const [toggle, setToggle] = useState<boolean>(false);
   const handleButtonClick = (value: boolean) => {
     form.setValue(code as string, value);
@@ -49,20 +58,28 @@ function ResponseField({
     }
   };
 
-  if (!["bool", "text", "number", "date", "dropdown"].includes(response_type))
-    throw new Error("Invalid response type");
+  if (
+    !["bool", "text", "number", "date", "dropdown", "textArea"].includes(
+      response_type
+    )
+  )
+    throw new TypeError("Invalid response type");
 
   if (response_type === "bool") {
     return (
       <Grid>
         <Grid
-          sx={{
-            width: "200px",
-            gridTemplateColumns: "1fr 1fr",
-            border: `1px solid #EDF2F7`,
-            borderRadius: "8px",
-            overflow: "hidden",
-          }}
+          sx={
+            toggleButtonContainer
+              ? toggleButtonContainer
+              : {
+                  width: "200px",
+                  gridTemplateColumns: "1fr 1fr",
+                  border: `1px solid #EDF2F7`,
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                }
+          }
           {...form.register(code as string, {
             required: !!is_mandatory,
           })}
@@ -70,23 +87,56 @@ function ResponseField({
           <Button
             variant={"solid"}
             onClick={() => handleButtonClick(true)}
-            sx={{
-              borderRadius: "8px 0 0 8px",
-              padding: "0 24px",
-              color: toggle ? "white" : "black",
-              background: toggle ? "#319795" : "White",
-            }}
+            sx={
+              toggleButton
+                ? {
+                    ...toggleButton,
+                    color: toggle
+                      ? toggleBtnTheme?.secondary || "white"
+                      : toggleBtnTheme?.primary || "black",
+                    background: toggle
+                      ? toggleBtnTheme?.primary || "#319795"
+                      : toggleBtnTheme?.secondary || "White",
+                  }
+                : {
+                    borderRadius: "8px 0 0 8px",
+                    padding: "0 24px",
+                    color: toggle
+                      ? toggleBtnTheme?.secondary || "white"
+                      : toggleBtnTheme?.primary || "black",
+                    background: toggle
+                      ? toggleBtnTheme?.primary || "#319795"
+                      : toggleBtnTheme?.secondary || "White",
+                  }
+            }
           >
             Yes
           </Button>
           <Button
             onClick={() => handleButtonClick(false)}
-            sx={{
-              borderRadius: "0 8px 8px 0",
-              padding: "0 24px",
-              color: toggle ? "black" : "white",
-              background: toggle ? "white" : "#319795",
-            }}
+            sx={
+              toggleButton
+                ? {
+                    ...toggleButton,
+                    color: toggle
+                      ? toggleBtnTheme?.secondary || "white"
+                      : toggleBtnTheme?.primary || "black",
+                    background: toggle
+                      ? toggleBtnTheme?.primary || "#319795"
+                      : toggleBtnTheme?.secondary || "White",
+                  }
+                : {
+                    borderRadius: "0 8px 8px 0",
+                    padding: "0 24px",
+                    color: toggle
+                      ? toggleBtnTheme?.primary || "black"
+                      : toggleBtnTheme?.secondary || "white",
+
+                    background: toggle
+                      ? toggleBtnTheme?.secondary || "White"
+                      : toggleBtnTheme?.primary || "#319795",
+                  }
+            }
           >
             No
           </Button>
@@ -119,6 +169,32 @@ function ResponseField({
             ...(regex ? { pattern: new RegExp(regex) } : {}),
           })}
         />
+        {form.formState.errors[code as string] && (
+          <Text fontSize={"small"} color={"red"}>
+            {reactHookFormErrMsg[errroType as keyof typeof reactHookFormErrMsg]}
+          </Text>
+        )}
+      </Box>
+    );
+  }
+  if (response_type === "textArea") {
+    return (
+      <Box>
+        <Textarea
+          {...form.register(code as string, {
+            required: !!is_mandatory,
+            ...(regex ? { pattern: new RegExp(regex) } : {}),
+          })}
+          sx={{
+            ...(inputSelectStyle
+              ? inputSelectStyle
+              : {
+                  width: "200px",
+                  border: `1px solid #EDF2F7`,
+                }),
+          }}
+          placeholder="Your answer here..."
+        ></Textarea>
         {form.formState.errors[code as string] && (
           <Text fontSize={"small"} color={"red"}>
             {reactHookFormErrMsg[errroType as keyof typeof reactHookFormErrMsg]}

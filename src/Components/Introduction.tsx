@@ -12,7 +12,12 @@ function Introduction() {
         marginTop="50px"
         marginBottom="30px"
       >
-        React - Questionnaire
+        <a
+          href="https://www.npmjs.com/package/react-questionaire"
+          target="_blank"
+        >
+          React - Questionaire
+        </a>
       </Text>
       <Box padding="20px">
         <Box marginBottom="24px">
@@ -20,10 +25,18 @@ function Introduction() {
             Introduction:
           </Text>
           <Text fontSize="lg" marginBottom="8px">
-            Welcome to the React Questionnaire Package! 🚀
+            Welcome to the
+            <a
+              href="https://www.npmjs.com/package/react-questionaire"
+              target="_blank"
+              style={{ textDecoration: "underline" }}
+            >
+              React Questionnaire Package!
+            </a>
+            🚀
           </Text>
           <Text fontSize="md">
-            The React Questionnaire Package is your all-in-one solution for
+            The React Questionaire Package is your all-in-one solution for
             building dynamic and interactive surveys, quizzes, feedback forms,
             and more within your React applications. 📊✨. It reduces developer
             time by simplifying the implementation of complex logic and handling

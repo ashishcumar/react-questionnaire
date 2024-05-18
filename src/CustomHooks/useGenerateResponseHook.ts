@@ -19,6 +19,7 @@ const useGenerateResponseHook = () => {
   };
 
   const restructureObject = (res: { [key: string]: any }) => {
+    console.log("restructureObject -->",res);
     const resKeys = Object.keys(res);
     const uniqueMemberHash: { [key: string]: string } = {};
     const resWithoutKeyName: string[] = [];
@@ -30,15 +31,17 @@ const useGenerateResponseHook = () => {
         resWithoutKeyName.push(key);
       }
     });
+    console.log({ res, uniqueMemberHash, resWithoutKeyName });
     Object.keys(uniqueMemberHash).forEach((member) => {
       resWithoutKeyName.forEach((key) => {
         const temp = `${member}-${key}`;
         if (resKeys.some((key) => key.startsWith(temp))) {
           res[temp] = res[key];
-          delete res[key];
         }
       });
     });
+
+   
 
     return { res, uniqueMemberHash };
   };
@@ -73,7 +76,17 @@ const useGenerateResponseHook = () => {
     return temp;
   };
 
-  return { generateResponse, generateResponseForMember };
+  const handleFormSubmit = (ref: { current: { formSubmit: () => void } }) => {
+    if (ref.current) {
+      ref.current.formSubmit();
+    }
+  };
+
+  return {
+    generateResponse,
+    generateResponseForMember,
+    handleFormSubmit,
+  };
 };
 
 export default useGenerateResponseHook;
